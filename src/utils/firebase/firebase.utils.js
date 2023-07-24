@@ -9,7 +9,8 @@ import {
   GoogleAuthProvider,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
-  signOut
+  signOut,
+  onAuthStateChanged
 } from "firebase/auth";
 
 //Database docs
@@ -95,3 +96,6 @@ export const signInAuthUserWithEmailAndPassword = async (email, password) => {
 };
 
 export const signOutUser = async () => await signOut(auth);
+
+//whenever auth changes, our callback will be called
+export const onAuthStateChangedListener = (callback) => onAuthStateChanged(auth, callback)
