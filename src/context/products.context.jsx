@@ -3,7 +3,7 @@ import { createContext, useState } from "react";
 import PRODUCTS from '../shopData.json';
 
 export const ProductsContext = createContext({
-    products: [],
+    // products: [],
 });
 
 export const ProductsProvider = ({children}) => {
