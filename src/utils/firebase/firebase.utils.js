@@ -10,11 +10,20 @@ import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signOut,
-  onAuthStateChanged
+  onAuthStateChanged,
 } from "firebase/auth";
 
 //Database docs
-import { getFirestore, doc, getDoc, setDoc } from "firebase/firestore";
+import {
+  getFirestore,
+  doc,
+  getDoc,
+  setDoc,
+  collection,
+  writeBatch, 
+  query, 
+  getDocs
+} from "firebase/firestore";
 
 const firebaseConfig = {
   apiKey: "AIzaSyAejA4I23h81W24rv-U5d0YCfrJ3RzlWb4",
@@ -37,11 +46,45 @@ googleProvider.setCustomParameters({
 export const auth = getAuth();
 export const signInWithGooglePopup = () =>
   signInWithPopup(auth, googleProvider);
+
 //testing different signin option 'redirect'
 export const signInWithGoogleRedirect = () =>
   signInWithRedirect(auth, googleProvider);
 
 export const db = getFirestore();
+
+export const addCollectionAndDocuments = async (collectionKey, objectsToAdd) => {
+  const collectionRef = collection(db, collectionKey);
+
+  const batch = writeBatch(db);
+
+  objectsToAdd.forEach((object) => {
+    const docRef = doc(collectionRef, object.title.toLowerCase());
+    batch.set(docRef, object);
+  });
+
+  await batch.commit();
+  console.log('done');  
+}
+
+export const getCategoriesAndDocuments = async () => {
+  const collectionRef = collection(db, 'categories');
+  //generate a query off of the collectionRef and will give us an object for a snapshot
+  const q = query(collectionRef);
+
+  //document snapshot based on collectionRef (fetching the docs)
+  const querySnapShot = await getDocs(q);
+
+  const categoryMap = querySnapShot.docs.reduce((acc, docSnapshot) => {
+    const {title, items} = docSnapshot.data();
+    acc[title.toLowerCase()] = items;
+    return acc;
+  }, {
+
+  })
+
+  return categoryMap;
+}
 
 export const createUserDocumentFromAuth = async (
   userAuth,
@@ -98,4 +141,5 @@ export const signInAuthUserWithEmailAndPassword = async (email, password) => {
 export const signOutUser = async () => await signOut(auth);
 
 //whenever auth changes, our callback will be called
-export const onAuthStateChangedListener = (callback) => onAuthStateChanged(auth, callback)
+export const onAuthStateChangedListener = (callback) =>
+  onAuthStateChanged(auth, callback);
